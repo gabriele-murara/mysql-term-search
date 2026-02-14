@@ -1,0 +1,8 @@
+[project]
+name = "mysql-text-search"
+version = "1.0.0-dev"
+description = "CLI tool to search text across all tables in a MySQL database"
+requires-python = ">=3.12"
+
+[project.scripts]
+mysql-search = "mysql_text_search.cli:main"
