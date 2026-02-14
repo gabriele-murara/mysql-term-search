@@ -5,6 +5,9 @@ from mysql_text_search.classes.match_types import MatchTypes
 from mysql_text_search.classes.version import get_version
 from mysql_text_search.search import MySQLTextSearch
 
+def hr():
+    print("------------------------------------------------------------------")
+
 def main():
     program_name = "Faster database search tool v. {}".format(
         get_version()
@@ -92,8 +95,9 @@ def main():
 
     args = parser.parse_args()
 
+    hr()
     msg = "Start to search term '{}' by case '{}' with match type '{}' "
-    msg += "on db: '{}' user: '{}' host: '{}' with  password: "
+    msg += "on db: '{}' user: '{}' host: '{}' with password: "
 
     case_sensitive_label = "sensitive"
     if args.case_insensitive:
@@ -107,10 +111,10 @@ def main():
         args.database_host
     )
 
+    password_label = "NO"
     if args.database_password:
-        msg += "YES"
-    else:
-        msg += "NO"
+        password_label = "YES"
+    msg += password_label
     print(msg)
 
     search = MySQLTextSearch(
@@ -124,6 +128,24 @@ def main():
 
     results = search.search(args.term)
 
+    case_label = ""
+    if args.case_insensitive:
+        case_label = "in"
+    hr()
+    msg = "List of results for the search term '{}' with match type '{}' "
+    msg += "case-{}sensitive by user '{}' in database '{}' on host '{}' "
+    msg += "password: {}"
+    msg = msg.format(
+        args.term,
+        args.match_type,
+        case_label,
+        args.database_user,
+        args.database_name,
+        args.database_host,
+        password_label
+    )
+    print(msg)
+    hr()
     print("[+] Match found")
     if len(results) <= 0:
         print("\tNo results")
@@ -131,9 +153,8 @@ def main():
         print("\t`{}`.`{}` -> {}".format(
             r['table'], r['column'], r['rows']
         ))
-
     if len(search.query_errors) > 0:
-        print("[-] Errors .................................................: ")
+        print("[-] Errors")
         for q, e in search.query_errors.items():
             msg = "{} -> Query: {}".format(e, q)
             print(msg)

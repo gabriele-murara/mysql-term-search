@@ -186,8 +186,8 @@ mysql-search \
 
 ```
 [+] Match found
-    `{table}`.`{column}` -> number of values
-    `{table}`.`{column}` -> number of values
+    `products`.`name` -> 2
+    `tickets`.`note` -> 1
 ```
 
 ---
