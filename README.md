@@ -31,6 +31,7 @@ pip install -e .
 ### Build a wheel
 
 ```bash
+python update_project.py
 python -m build
 pip install dist/mysql_text_search-<version>-py3-none-any.whl
 ```
