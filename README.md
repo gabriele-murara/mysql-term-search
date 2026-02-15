@@ -31,10 +31,28 @@ pip install -e .
 ### Build a wheel
 
 ```bash
+python update_project.py
 python -m build
 pip install dist/mysql_text_search-<version>-py3-none-any.whl
 ```
 
+### Install for use in another project
+
+```bash
+pip install --extra-index-url https://pip.murara.computer \
+            --trusted-host pip.murara.computer \
+            mysql-text-search
+```
+
+### Adding to requirements.txt
+
+```
+--index-url https://pypi.org/simple
+--extra-index-url https://pip.murara.computer
+--trusted-host pip.murara.computer
+
+mysql-text-search==1.1.0
+```
 ---
 
 ## ⚙️ Configuration
