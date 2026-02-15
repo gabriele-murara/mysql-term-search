@@ -1,6 +1,6 @@
 [project]
 name = "mysql-text-search"
-version = "1.0.0"
+version = "1.1.0-dev"
 description = "CLI tool to search text across all tables in a MySQL database"
 requires-python = ">=3.12"
 
