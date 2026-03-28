@@ -1,7 +1,8 @@
 import os
+
+from boolifyer.booleans import Booleans
 from dotenv import load_dotenv
 
-from mysql_text_search.classes.env_utility import EnvUtility
 from mysql_text_search.classes.match_types import MatchTypes
 
 load_dotenv(override=False)
@@ -12,7 +13,7 @@ DB_USER = os.getenv('DB_USER', 'root')
 DB_PASSWORD = os.getenv('DB_PASSWORD', None)
 DB_PORT = os.getenv('DB_PORT', 3306)
 
-CASE_INSENSITIVE_SEARCH = EnvUtility.to_boolean(
+CASE_INSENSITIVE_SEARCH = Booleans.to_boolean(
     os.getenv('CASE_INSENSITIVE_SEARCH', False)
 )
 
