@@ -1,8 +1,41 @@
+import colorlog
+import logging
 import mysql.connector
+from nano_logger.nano_logger import NanoLogger
 from tqdm import tqdm
+
 
 from mysql_text_search.classes.match_types import MatchTypes
 
+class ProgressBarLoggingHandler(colorlog.StreamHandler):
+    """ Handler for print messages in progressbar context. Loads
+    'verbose' format from settings and appends color placeholder
+
+    """
+
+    def __init__(self, level=logging.DEBUG):
+        super().__init__(level)
+
+    def emit(self, record):
+        try:
+            # Loads verbose format from settings and append the color
+            # placeholder
+            # print(settings.LOGGING)
+            colored_format = "%(log_color)s{}".format(
+                '[%(asctime)s] %(levelname)s %(message)s - {%(module)s:%(funcName)s:%(lineno)d}'
+            )
+            # Init a new ColoredFormatter with the colored verbose format
+            colored_formatter = colorlog.ColoredFormatter(colored_format)
+            # Set the VerboseColoredFormatter to this handler
+            self.setFormatter(colored_formatter)
+            msg = self.format(record)
+            tqdm.write(msg)
+            self.flush()
+        except Exception:
+            self.handleError(record)
+            exit(1)
+
+logger = NanoLogger()
 
 class MySQLTextSearch:
 
@@ -17,6 +50,15 @@ class MySQLTextSearch:
         )
         self.__match_type = kwargs.get('match_type', None)
         self.__query_errors = {}
+        # Logging instance
+
+        # Colored handler for console logs messages in progress bar context
+        tqdm_handler = ProgressBarLoggingHandler()
+
+        internal_logger = logger._NanoLogger__logger
+        internal_logger.addHandler(tqdm_handler)
+
+        logger._NanoLogger__logger = internal_logger
 
 
     def search(self, value_to_search):
@@ -49,7 +91,7 @@ class MySQLTextSearch:
         query_mapping = {}
         try:
             fetch_query = fetch_query.format(self.__database_name)
-            print("Fetch columns -> {}".format(fetch_query))
+            logger.debug("Fetch columns -> {}".format(fetch_query))
             cursor.execute(fetch_query)
             rows = cursor.fetchall()
             if len(rows) > 0:
@@ -61,7 +103,7 @@ class MySQLTextSearch:
                 term_template = MatchTypes.get_search_template(match_type)
                 term = term_template.format(value_to_search)
 
-                print("Found {} columns...".format(len(rows)))
+                logger.info("Found {} columns...".format(len(rows)))
                 for r in rows:
                     table_name = r[0]
                     column_name = r[1]
@@ -83,10 +125,10 @@ class MySQLTextSearch:
                         'table': table_name
                     }
             else:
-                print("No columns found")
+                logger.warning("No columns found")
 
         except Exception as e:
-            print(f"Errore nella query: {fetch_query}\n{e}")
+            logger.error(f"Errore nella query: {fetch_query}\n{e}")
             exit(1)
 
         results = []
@@ -94,11 +136,22 @@ class MySQLTextSearch:
         # 3. Executing the queries
         for q in tqdm(query_mapping.keys()):
             try:
-                # print("Eseguo {}".format(q))
+                query_params = query_mapping[q]
+                logger.debug("Search '{}' in `{}`.`{}`".format(
+                    value_to_search,
+                    query_params['table'],
+                    query_params['column']
+                ))
                 cursor.execute(q)
                 rows = cursor.fetchall()
                 if len(rows) > 0:
-                    query_params = query_mapping[q]
+                    msg = "Match '{}' found {} times in `{}`.`{}`".format(
+                        value_to_search,
+                        len(rows),
+                        query_params['table'],
+                        query_params['column']
+                    )
+                    logger.info(msg)
                     results.append({
                         'query': q,
                         'rows': len(rows),

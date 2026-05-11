@@ -1,14 +1,18 @@
 import argparse
 
+from nano_logger.nano_logger import NanoLogger
+
 from mysql_text_search import settings
 from mysql_text_search.classes.match_types import MatchTypes
 from mysql_text_search.classes.version import get_version
 from mysql_text_search.search import MySQLTextSearch
 
+
 def hr():
     print("------------------------------------------------------------------")
 
 def main():
+    logger = NanoLogger()
     program_name = "Faster database search tool v. {}".format(
         get_version()
     )
@@ -95,7 +99,6 @@ def main():
 
     args = parser.parse_args()
 
-    hr()
     msg = "Start to search term '{}' by case '{}' with match type '{}' "
     msg += "on db: '{}' user: '{}' host: '{}' with password: "
 
@@ -115,7 +118,7 @@ def main():
     if args.database_password:
         password_label = "YES"
     msg += password_label
-    print(msg)
+    logger.info(msg)
 
     search = MySQLTextSearch(
         database_name=args.database_name,
